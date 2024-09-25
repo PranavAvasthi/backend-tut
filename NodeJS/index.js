@@ -5,6 +5,10 @@ import http from "http";
 // console.log(http);
 import fullName, { fullName2, generateRandomPercentage } from "./features.js";
 import fs from "fs";
+import path from "path";
+
+console.log(path.extname("/home/random/index.html"));
+console.log(path.dirname("/home/index.html"));
 
 // by this way, we can avoid writing this inside the if statement as this is synchronous and other program will run only after this executes
 // const home = fs.readFileSync("./index.html")
