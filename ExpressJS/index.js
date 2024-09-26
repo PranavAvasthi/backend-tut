@@ -2,6 +2,7 @@ import express from "express";
 import path from "path";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 // console.log(process.env.MONGO_DB_SERVER);
@@ -28,6 +29,7 @@ app.set("view engine", "ejs");
 // Using Middlewares
 app.use(express.static(path.join(path.resolve(), "public")));
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.get("/getproducts", (req, res) => {
   // res.send("Hi");
@@ -48,8 +50,34 @@ app.get("/getproducts", (req, res) => {
 //   res.sendFile(path.join(pathLocation, "./index.html"));
 // });
 
+// app.get("/", (req, res) => {
+//   res.render("index", { name: "Pranav" });
+// });
+
 app.get("/", (req, res) => {
-  res.render("index", { name: "Pranav" });
+  const { token } = req.cookies;
+
+  if (token) {
+    res.render("logout");
+  } else {
+    res.render("login");
+  }
+});
+
+app.post("/login", (req, res) => {
+  res.cookie("token", "tok-val", {
+    httpOnly: true,
+    expires: new Date(Date.now() + 60 * 1000),
+  });
+  res.redirect("/");
+});
+
+app.get("/logout", (req, res) => {
+  res.cookie("token", null, {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+  res.redirect("/");
 });
 
 app.get("/success", (req, res) => {
