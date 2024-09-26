@@ -1,16 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Home</title>
-    <link rel="stylesheet" href="styles.css">
-</head>
-<body>
-    <h1>Home Page</h1>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <!-- <h1>Home Page</h1>
     <h2>Accessing the name sent as the data from app.render()</h2>
-    <h3>Hello <%=name %></h3>
+    <h3>Hello <%=name %></h3> -->
+
+    <main>
+      <form method="post">
+        <h1>Contact Now</h1>
+        <input type="text" name="name" placeholder="Enter name" />
+        <input type="email" name="email" placeholder="Enter email" />
+        <button type="submit">Send Message</button>
+      </form>
+    </main>
 
     <script src="script.js"></script>
-</body>
+  </body>
 </html>
