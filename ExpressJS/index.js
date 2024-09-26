@@ -1,7 +1,10 @@
 import express from "express";
-import path from "path";
+// import path from "path";
 
 const app = express();
+
+// Setting up the View Engine
+app.set("view engine", "ejs");
 
 app.get("/getproducts", (req, res) => {
   // res.send("Hi");
@@ -16,11 +19,15 @@ app.get("/getproducts", (req, res) => {
   // res.status(400).send("Random Error")
 });
 
+// app.get("/", (req, res) => {
+//   const pathLocation = path.resolve(); // gives the current directory path
+//   // path.join(pathLocation, "./index.html") -> joins the pathLocation path to index.html
+//   res.sendFile(path.join(pathLocation, "./index.html"));
+// });
+
 app.get("/", (req, res) => {
-  const pathLocation = path.resolve(); // gives the current directory path
-  // path.join(pathLocation, "./index.html") -> joins the pathLocation path to index.html
-  res.sendFile(path.join(pathLocation, "./index.html"));
-});
+    res.render("index", { name: "Pranav" });
+})
 
 app.listen(5000, () => {
   console.log("Server is working");
