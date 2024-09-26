@@ -45,6 +45,12 @@ app.post("/", (req, res) => {
   res.redirect("/success");
 });
 
+app.get("/users", (req, res) => {
+  res.json({
+    users,
+  });
+});
+
 app.listen(5000, () => {
   console.log("Server is working");
 });
