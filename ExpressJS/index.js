@@ -1,9 +1,26 @@
 import express from "express";
 import path from "path";
+import mongoose from "mongoose";
+import dotenv from "dotenv";
+
+dotenv.config();
+// console.log(process.env.MONGO_DB_SERVER);
+
+mongoose
+  .connect(process.env.MONGO_DB_SERVER)
+  .then(() => {
+    console.log("mongodb server connected");
+  })
+  .catch((err) => console.log(err));
+
+const messageSchema = new mongoose.Schema({
+  name: String,
+  email: String,
+});
+
+const Message = mongoose.model("Message", messageSchema);
 
 const app = express();
-
-const users = [];
 
 // Setting up the View Engine
 app.set("view engine", "ejs");
@@ -39,8 +56,10 @@ app.get("/success", (req, res) => {
   res.render("success");
 });
 
-app.post("/", (req, res) => {
-  users.push({ username: req.body.name, email: req.body.email });
+app.post("/contact", async (req, res) => {
+  // await Message.create({ name: req.body.name, email: req.body.email });
+  const { name, email } = req.body;
+  await Message.create({ name, email });
 
   res.redirect("/success");
 });
@@ -49,6 +68,11 @@ app.get("/users", (req, res) => {
   res.json({
     users,
   });
+});
+
+app.get("/add", async (req, res) => {
+  await Message.create({ name: "Pranav", email: "pranav@email.com" });
+  res.send("MongoDB Connection");
 });
 
 app.listen(5000, () => {
