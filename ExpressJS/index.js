@@ -54,14 +54,19 @@ app.get("/getproducts", (req, res) => {
 //   res.render("index", { name: "Pranav" });
 // });
 
-app.get("/", (req, res) => {
+// Authentication (using next params)
+const isAuthenticated = (req, res, next) => {
   const { token } = req.cookies;
 
   if (token) {
-    res.render("logout");
+    next();
   } else {
     res.render("login");
   }
+};
+
+app.get("/", isAuthenticated, (req, res) => {
+  res.render("logout");
 });
 
 app.post("/login", (req, res) => {
