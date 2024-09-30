@@ -3,6 +3,8 @@ import path from "path";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 dotenv.config();
 // console.log(process.env.MONGO_DB_SERVER);
@@ -14,12 +16,20 @@ mongoose
   })
   .catch((err) => console.log(err));
 
-const messageSchema = new mongoose.Schema({
+// const messageSchema = new mongoose.Schema({
+//   name: String,
+//   email: String,
+// });
+
+// const Message = mongoose.model("Message", messageSchema);
+
+const userSchema = new mongoose.Schema({
   name: String,
   email: String,
+  password: String,
 });
 
-const Message = mongoose.model("Message", messageSchema);
+const User = mongoose.model("User", userSchema);
 
 const app = express();
 
@@ -55,22 +65,71 @@ app.get("/getproducts", (req, res) => {
 // });
 
 // Authentication (using next params)
-const isAuthenticated = (req, res, next) => {
+const isAuthenticated = async (req, res, next) => {
   const { token } = req.cookies;
 
   if (token) {
+    const decoded = jwt.verify(token, "abcde");
+
+    req.user = await User.findById(decoded._id);
+
     next();
   } else {
-    res.render("login");
+    res.redirect("/login");
   }
 };
 
 app.get("/", isAuthenticated, (req, res) => {
-  res.render("logout");
+  console.log(req.user);
+  res.render("logout", { name: req.user.name });
 });
 
-app.post("/login", (req, res) => {
-  res.cookie("token", "tok-val", {
+app.get("/register", (req, res) => {
+  res.render("register");
+});
+
+app.post("/register", async (req, res) => {
+  const { name, email, password } = req.body;
+
+  let user = await User.findOne({ email });
+  if (user) {
+    return res.redirect("/login");
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  user = await User.create({ name, email, password: hashedPassword });
+
+  const token = jwt.sign({ _id: user._id }, "abcde");
+
+  res.cookie("token", token, {
+    httpOnly: true,
+    expires: new Date(Date.now() + 60 * 1000),
+  });
+  res.redirect("/");
+});
+
+app.get("/login", (req, res) => {
+  res.render("login");
+});
+
+app.post("/login", async (req, res) => {
+  const { email, password } = req.body;
+
+  let user = await User.findOne({ email });
+
+  if (!user) {
+    return res.redirect("/register");
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    return res.render("login", { email, message: "Incorrect Password" });
+  }
+
+  const token = jwt.sign({ _id: user._id }, "abcde");
+
+  res.cookie("token", token, {
     httpOnly: true,
     expires: new Date(Date.now() + 60 * 1000),
   });
@@ -89,24 +148,24 @@ app.get("/success", (req, res) => {
   res.render("success");
 });
 
-app.post("/contact", async (req, res) => {
-  // await Message.create({ name: req.body.name, email: req.body.email });
-  const { name, email } = req.body;
-  await Message.create({ name, email });
+// app.post("/contact", async (req, res) => {
+//   // await Message.create({ name: req.body.name, email: req.body.email });
+//   const { name, email } = req.body;
+//   await Message.create({ name, email });
 
-  res.redirect("/success");
-});
+//   res.redirect("/success");
+// });
 
-app.get("/users", (req, res) => {
-  res.json({
-    users,
-  });
-});
+// app.get("/users", (req, res) => {
+//   res.json({
+//     users,
+//   });
+// });
 
-app.get("/add", async (req, res) => {
-  await Message.create({ name: "Pranav", email: "pranav@email.com" });
-  res.send("MongoDB Connection");
-});
+// app.get("/add", async (req, res) => {
+//   await Message.create({ name: "Pranav", email: "pranav@email.com" });
+//   res.send("MongoDB Connection");
+// });
 
 app.listen(5000, () => {
   console.log("Server is working");
